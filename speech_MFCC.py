@@ -18,7 +18,7 @@ def get_labels(path=DATA_PATH):
     return labels, label_indices, to_categorical(label_indices)
 
 
-def speech_to_mfcc(file_path,max_len=11):
+def speech_to_mfcc(file_path,max_len=13):
     wave, sr= librosa.load(file_path, mono=True, sr=None)
     wave=wave[::5]
     mfcc=librosa.feature.mfcc(wave,sr=16000)
@@ -30,7 +30,7 @@ def speech_to_mfcc(file_path,max_len=11):
     return mfcc
 
 
-def save_data_to_array(path=DATA_PATH, max_len=11):
+def save_data_to_array(path=DATA_PATH, max_len=13):
     labels,_,_=get_labels(path)
 
     for label in labels:
@@ -60,20 +60,22 @@ def get_train_test(split_ratio=0.8,random_state=42):
 
 
 X_train, X_test, y_train, y_test=get_train_test()
-X_train=X_train.reshape(X_train.shape[0],20,11,1)
-X_test=X_test.reshape(X_test.shape[0],20,11,1)
+X_train=X_train.reshape(X_train.shape[0],20,13,1)
+X_test=X_test.reshape(X_test.shape[0],20,13,1)
 y_train_hot=to_categorical(y_train)
 y_test_hot=to_categorical(y_test)
 
 
 model=Sequential()
-model.add(Conv2D(64,kernel_size=(2,2),activation='tanh',input_shape=(20,11,1)))
+model.add(Conv2D(128,kernel_size=(2,2),activation='tanh',input_shape=(20,13,1)))
+model.add(MaxPooling2D(pool_size=(2,2)))
+model.add(Conv2D(64,kernel_size=(2,2),activation='tanh'))
 model.add(MaxPooling2D(pool_size=(2,2)))
 model.add(Dropout(0.4))
 model.add(Flatten())
 model.add(Dense(128,activation='relu'))
 model.add(Dropout(0.4))
-model.add(Dense(10,activation='softmax'))
+model.add(Dense(7,activation='softmax'))
 
 model.summary()
 
